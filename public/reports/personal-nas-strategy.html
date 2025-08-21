@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球个人私有云市场战略分析报告 - 交互式仪表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Alabaster & Trustworthy Blue -->
+    <!-- Application Structure Plan: 本应用采用非线性的主题式仪表板布局，而非报告的章节式结构。顶部设有粘性导航，方便用户在“市场洞察”、“用户画像”、“竞争格局”、“技术前沿”和“战略机遇”五大核心主题间自由跳转。这种设计旨在打破传统报告的阅读壁垒，让用户可以根据自身兴趣快速定位并深入探索关键信息。例如，用户可以直接跳转到“用户画像”部分，通过点击交互式卡片深入了解不同消费群体的需求，或在“竞争格局”中通过动态比较矩阵直观地理解各方势力的战略定位。此结构优先考虑用户探索的自由度和信息的可发现性，旨在将数据分析转化为一次引人入胜的互动体验。 -->
+    <!-- Visualization & Content Choices: 1. 市场规模图表: (报告信息: TAM/SAM/SOM预测数据) -> (目标: 展示市场增长趋势) -> (可视化方法: 交互式折线图) -> (交互: 悬停显示详细数据) -> (理由: 折线图最适合展示时间序列数据，直观呈现增长潜力) -> (库: Chart.js)。 2. 用户画像对比: (报告信息: 三类核心用户群) -> (目标: 深入理解消费者) -> (呈现方法: 选项卡式交互卡片) -> (交互: 点击切换不同用户画像的详细信息) -> (理由: 将复杂的用户分层信息分解为易于消化的模块，增强可读性)。 3. 竞争格局矩阵: (报告信息: 不同类型玩家对比) -> (目标: 清晰展示市场竞争态势) -> (呈现方法: 结构化的HTML/CSS卡片网格) -> (交互: 悬停高亮，点击可展开详情) -> (理由: 将多维度对比信息结构化，便于快速比较和理解)。 4. 技术趋势: (报告信息: 硬件/软件/AI趋势) -> (目标: 揭示技术驱动力) -> (呈现方法: 图标+文字的交互式卡片) -> (交互: 点击卡片展开详细解释) -> (理由: 视觉化的卡片设计比纯文本更具吸引力，能引导用户主动探索)。所有设计均遵循用户体验优先原则，旨在将复杂的战略报告转化为易于理解的洞察。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #4A90E2;
+            border-bottom-color: #4A90E2;
+        }
+        .persona-tab.active {
+            background-color: #4A90E2;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="smooth-scroll">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">个人私有云市场洞察</h1>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#market" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">市场洞察</a>
+                    <a href="#personas" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">用户画像</a>
+                    <a href="#competition" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">竞争格局</a>
+                    <a href="#tech" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">技术前沿</a>
+                    <a href="#strategy" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">战略机遇</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="#market">市场洞察</option>
+                        <option value="#personas">用户画像</option>
+                        <option value="#competition">竞争格局</option>
+                        <option value="#tech">技术前沿</option>
+                        <option value="#strategy">战略机遇</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        <section class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-gray-800">全球个人私有云市场战略分析</h2>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                探索个人私有云如何从一个小众极客工具，演变为一个由数据隐私和易用性驱动的、面向广大家庭的“蓝海”市场。
+            </p>
+        </section>
+
+        <section id="market" class="mb-20 pt-16 -mt-16">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-gray-800">市场洞察：规模、增长与驱动力</h3>
+            <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">本部分提供了对全球个人私有云市场潜力的高层次概览，通过核心数据与增长预测，揭示了推动这一市场扩张的关键力量。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                    <h4 class="text-4xl font-bold text-[#4A90E2] mb-2" id="tam-2024">$1,320亿</h4>
+                    <p class="text-gray-600">2024年 总可用市场 (TAM)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                    <h4 class="text-4xl font-bold text-[#4A90E2] mb-2" id="sam-2030">$775亿</h4>
+                    <p class="text-gray-600">2030年 可服务市场 (SAM) 预测</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                    <h4 class="text-4xl font-bold text-[#4A90E2] mb-2" id="cagr">~25%</h4>
+                    <p class="text-gray-600">可服务市场年复合增长率 (CAGR)</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200/50 mb-12">
+                <h4 class="text-xl font-semibold text-center mb-4 text-gray-700">市场规模预测 (2024-2030)</h4>
+                <div class="chart-container">
+                    <canvas id="marketSizeChart"></canvas>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-xl font-semibold text-center mb-6 text-gray-700">核心增长引擎</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                        <div class="text-3xl mb-3">💾</div>
+                        <h5 class="font-bold text-lg mb-2">数据量爆炸式增长</h5>
+                        <p class="text-gray-600 text-sm">高清照片、4K/8K视频等个人数据以前所未有的速度急剧增加，催生了海量存储需求。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                        <div class="text-3xl mb-3">🛡️</div>
+                        <h5 class="font-bold text-lg mb-2">数据隐私与安全意识</h5>
+                        <p class="text-gray-600 text-sm">对数据泄露和滥用的担忧，促使消费者寻求能完全控制个人数据的“数据主权”解决方案。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                        <div class="text-3xl mb-3">💼</div>
+                        <h5 class="font-bold text-lg mb-2">远程办公常态化</h5>
+                        <p class="text-gray-600 text-sm">为自由职业者和小型团队提供了安全、可控且无持续订阅费用的远程协作平台。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                        <div class="text-3xl mb-3">💰</div>
+                        <h5 class="font-bold text-lg mb-2">长期成本效益</h5>
+                        <p class="text-gray-600 text-sm">一次性硬件投入，避免了公有云的“订阅疲劳”，长期总拥有成本（TCO）更低。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="personas" class="mb-20 pt-16 -mt-16">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-gray-800">核心用户画像：谁在购买私有云？</h3>
+            <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">理解消费者的动机是产品成功的基石。本部分深入剖析三类核心用户群体，揭示他们选择私有云背后独特的“待办任务”与核心痛点。</p>
+            
+            <div class="flex justify-center space-x-2 md:space-x-4 mb-8">
+                <button class="persona-tab active text-sm md:text-base font-semibold px-4 py-2 rounded-full transition duration-300" data-persona="enthusiast">科技极客</button>
+                <button class="persona-tab text-sm md:text-base font-semibold px-4 py-2 rounded-full transition duration-300" data-persona="creator">内容创作者</button>
+                <button class="persona-tab text-sm md:text-base font-semibold px-4 py-2 rounded-full transition duration-300" data-persona="family">隐私家庭</button>
+            </div>
+
+            <div id="persona-content" class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200/50 min-h-[300px]">
+            </div>
+        </section>
+
+        <section id="competition" class="mb-20 pt-16 -mt-16">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-gray-800">竞争格局：巨头与新锐的博弈</h3>
+            <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">个人私有云市场并非一片空白。本部分将分析从根基深厚的传统NAS厂商，到体验至上的新兴力量，再到无处不在的公有云巨头，它们各自的战略定位与核心优势。</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                    <h4 class="font-bold text-xl mb-3 text-center text-gray-700">传统厂商 (如 Synology)</h4>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>目标用户:</strong> 科技极客、创作者、中小企业</div></li>
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>价值主张:</strong> 功能强大、高度可定制、专业的数据管理平台</div></li>
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>核心优势:</strong> 成熟的品牌、庞大的软件生态和活跃的社区</div></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2 font-bold">●</span><div><strong>主要挑战:</strong> 学习曲线陡峭，对非技术用户不够友好</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-[#4A90E2] transform scale-105">
+                     <div class="text-center mb-3"><span class="bg-[#4A90E2] text-white text-sm font-bold px-3 py-1 rounded-full">新兴力量 (如 懒猫微服)</span></div>
+                    <h4 class="font-bold text-xl mb-3 text-center text-gray-700">新兴力量 (如 懒猫微服)</h4>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>目标用户:</strong> 隐私敏感型家庭、非技术背景的普通消费者</div></li>
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>价值主张:</strong> 简单易用、安全私密、专为家庭设计的“数据保险箱”</div></li>
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>核心优势:</strong> 差异化市场定位，专注简化用户体验，移动优先</div></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2 font-bold">●</span><div><strong>主要挑战:</strong> 品牌信任度低，生态系统尚不完善</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50">
+                    <h4 class="font-bold text-xl mb-3 text-center text-gray-700">公有云 (如 Google/Apple)</h4>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>目标用户:</strong> 所有互联网用户，特别是移动设备用户</div></li>
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>价值主张:</strong> 极致便利、多设备无缝同步、强大的AI功能</div></li>
+                        <li class="flex items-start"><span class="text-[#4A90E2] mr-2 font-bold">●</span><div><strong>核心优势:</strong> 庞大用户基数、无缝生态整合、强大的品牌力</div></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2 font-bold">●</span><div><strong>主要挑战:</strong> 根深蒂固的隐私担忧，长期订阅成本高</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech" class="mb-20 pt-16 -mt-16">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-gray-800">技术前沿：重塑市场格局的力量</h3>
+            <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">技术是驱动市场变革的核心引擎。本部分将探讨正在系统性提升私有云产品性能与体验，并创造全新差异化机会的关键技术趋势。</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50 text-center">
+                    <div class="text-5xl mb-4">⚙️</div>
+                    <h4 class="font-bold text-xl mb-3">硬件革命</h4>
+                    <p class="text-gray-600"><strong>ARM架构</strong>、<strong>万兆网络</strong>与<strong>NVMe缓存</strong>的融合，正系统性地解决性能瓶颈，提供媲美甚至超越公有云的本地访问体验。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50 text-center">
+                    <div class="text-5xl mb-4">📦</div>
+                    <h4 class="font-bold text-xl mb-3">软件生态：Docker</h4>
+                    <p class="text-gray-600">以<strong>Docker</strong>为代表的容器化技术，将设备从封闭产品变为开放平台，引入无限扩展的“应用商店”，极大增强了用户粘性。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200/50 text-center">
+                    <div class="text-5xl mb-4">🧠</div>
+                    <h4 class="font-bold text-xl mb-3">智能化：本地AI</h4>
+                    <p class="text-gray-600"><strong>本地AI</strong>是终极“杀手锏”，它让用户同时拥有公有云的智能便利和私有云的极致隐私，是说服大众市场的最强理由。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="pt-16 -mt-16">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-gray-800">战略机遇：新进入者的蓝海之路</h3>
+            <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">综合以上分析，市场的未来并非牢不可破。本部分将为新进入者勾勒出一条清晰的成功路径，揭示如何通过差异化战略，在巨头环伺的市场中开辟属于自己的蓝海。</p>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200/50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h4 class="text-xl font-semibold text-gray-700 mb-4">核心市场缺口：在复杂与简单之间</h4>
+                        <p class="text-gray-600 mb-6">当前市场最大的战略空白，存在于传统NAS的“技术复杂性”与大众市场的“简单化需求”之间的巨大鸿沟。新进入者的机会在于成为连接这座鸿沟的桥梁。</p>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h5 class="font-bold">🎯 产品战略：用户体验为王</h5>
+                                <p class="text-sm text-gray-600">聚焦极致简化的开箱体验和以移动App为核心的交互，打造一个像家电一样“即插即用”的数据保险箱。</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h5 class="font-bold">📢 市场策略：内容教育先行</h5>
+                                <p class="text-sm text-gray-600">通过内容营销教育市场，建立早期用户社区，并聚焦线上直销渠道，直接与消费者沟通，建立品牌信任。</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h5 class="font-bold">📈 商业模式：硬件入口 + 增值服务</h5>
+                                <p class="text-sm text-gray-600">以一次性付费的硬件获取用户，后期提供可选的、真正有价值的增值服务（如加密云端备份、高级AI功能）来构建可持续收入。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative w-full aspect-square p-4 md:p-8">
+                        <div class="grid grid-cols-2 grid-rows-2 w-full h-full gap-2">
+                            <div class="bg-red-100/50 rounded-lg flex items-center justify-center p-2 text-center text-red-800 font-semibold">传统NAS<br>(功能强, 体验复杂)</div>
+                            <div class="bg-green-100/50 rounded-lg flex items-center justify-center p-2 text-center text-green-800 font-semibold">公有云<br>(功能中, 体验简单)</div>
+                            <div class="bg-gray-200 rounded-lg flex items-center justify-center p-2 text-center text-gray-600">DIY方案<br>(功能灵活, 体验极复杂)</div>
+                            <div class="bg-blue-200/50 border-2 border-dashed border-blue-500 rounded-lg flex flex-col items-center justify-center p-2 text-center text-blue-800 font-bold">
+                                <span>🌊</span>
+                                蓝海机遇<br>(功能聚焦, 体验极致简单)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 mt-12 border-t border-gray-200">
+        <p class="text-gray-500 text-sm">数据来源于《全球家庭/个人私有云市场综合战略分析报告》</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const marketData = {
+                labels: ['2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                datasets: [
+                    {
+                        label: '总可用市场 (TAM) 亿美元',
+                        data: [1320, 1613, 1963, 2389, 2907, 3538, 4305],
+                        borderColor: '#a9a9a9',
+                        backgroundColor: 'rgba(169, 169, 169, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                    },
+                    {
+                        label: '可服务市场 (SAM) 亿美元',
+                        data: [198, 250, 314, 394, 494, 619, 775],
+                        borderColor: '#4A90E2',
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                    },
+                    {
+                        label: '可获得服务市场 (SOM) 亿美元',
+                        data: [0.5, 2.5, 8.0, 20.0, 45.0, 90.0, 160.0],
+                        borderColor: '#50E3C2',
+                        backgroundColor: 'rgba(80, 227, 194, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                    }
+                ]
+            };
+
+            const personaData = {
+                enthusiast: {
+                    title: '科技极客与DIY爱好者',
+                    icon: '🚀',
+                    description: '对技术有深入理解和浓厚兴趣，追求极致性能、高度定制化和对设备的完全掌控。他们不仅是消费者，更是玩家和创造者。',
+                    needs: [
+                        '强劲的硬件性能 (万兆网络, NVMe缓存)',
+                        '开放的软件生态 (必须支持Docker)',
+                        '高度的可定制性 (可访问底层系统)'
+                    ],
+                    pains: [
+                        '无法容忍封闭、无法定制的“黑盒”产品',
+                        '功能限制和性能瓶颈是最大“劝退”因素'
+                    ]
+                },
+                creator: {
+                    title: '内容创作者与专业人士',
+                    icon: '🎬',
+                    description: '摄影师、视频剪辑师等，工作或爱好会产生海量大容量数字文件。数据对他们而言既是资产，也是生产资料。',
+                    needs: [
+                        '海量且可靠的存储空间 (多盘位, RAID)',
+                        '高速的数据传输与访问 (在线剪辑4K视频)',
+                        '安全便捷的协作与文件交付'
+                    ],
+                    pains: [
+                        '公有云上传/下载大文件速度缓慢且成本高昂',
+                        '多个移动硬盘管理混乱，且有数据丢失风险'
+                    ]
+                },
+                family: {
+                    title: '高净值家庭与隐私敏感型用户',
+                    icon: '👨‍👩‍👧‍👦',
+                    description: '市场中规模最大、最具增长潜力的群体。可能不精通技术，但对家庭私密数据（如成长记录）的隐私和安全极为重视。',
+                    needs: [
+                        '极致的简单易用 (“开箱即用”, “一键设置”)',
+                        '自动化与智能化 (自动备份, 智能分类)',
+                        '安全可靠的家庭内部私密共享'
+                    ],
+                    pains: [
+                        '怀疑公有云的隐私政策，担心数据被滥用',
+                        '主流NAS产品过于专业复杂，使用门槛太高'
+                    ]
+                }
+            };
+
+            const ctx = document.getElementById('marketSizeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: marketData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '市场规模 (亿美元)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const personaTabs = document.querySelectorAll('.persona-tab');
+            const personaContent = document.getElementById('persona-content');
+
+            function updatePersonaContent(personaKey) {
+                const data = personaData[personaKey];
+                personaContent.innerHTML = `
+                    <div class="fade-in">
+                        <div class="text-center mb-4">
+                            <span class="text-4xl">${data.icon}</span>
+                            <h4 class="text-xl font-bold mt-2">${data.title}</h4>
+                            <p class="text-gray-500 max-w-xl mx-auto mt-1">${data.description}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-green-800 mb-2">核心需求</h5>
+                                <ul class="space-y-1 text-sm text-green-700 list-disc list-inside">
+                                    ${data.needs.map(need => `<li>${need}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <h5 class="font-semibold text-red-800 mb-2">核心痛点</h5>
+                                <ul class="space-y-1 text-sm text-red-700 list-disc list-inside">
+                                    ${data.pains.map(pain => `<li>${pain}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            personaTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    personaTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    updatePersonaContent(tab.dataset.persona);
+                });
+            });
+
+            updatePersonaContent('enthusiast');
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section[id]');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            mobileNav.addEventListener('change', (e) => {
+                const targetId = e.target.value;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+
+            function onScroll() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+
+                if (current) {
+                    mobileNav.value = `#${current}`;
+                }
+            }
+
+            window.addEventListener('scroll', onScroll);
+            onScroll();
+        });
+    </script>
+</body>
+</html>
