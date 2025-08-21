@@ -1,11 +1,12 @@
 # Deep Research Reports
 
-This repository hosts deep-dive research reports as static HTML files.  
-Deployed via [Cloudflare Pages](https://pages.cloudflare.com/).
+Static HTML reports deployed on Cloudflare Pages, with automatic routing via Pages Functions (`_worker.js`).
 
-## Reports
-- [全球个人私有云市场战略分析报告](./public/reports/personal-nas-strategy.html)
+## Routing
+The worker lets you link **extensionless** URLs:
+- `/2025/personal-nas-strategy` → tries `/2025/personal-nas-strategy/`, `/2025/personal-nas-strategy.html`, `/2025/personal-nas-strategy/index.html`.
+- `/reports/another-report` → `/reports/another-report.html`.
 
-## License
-Content is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).  
-You are free to share and adapt with attribution, but not for commercial use.
+So you can keep both folder-style and single-file HTML side by side.
+
+## Project layout
